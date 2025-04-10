@@ -4,20 +4,6 @@ import { z } from "zod";
 import { AppError } from "@/utils/AppError";
 
 class ProductsController {
-  async index(request: Request, response: Response, next: NextFunction) {
-    try {
-      const { name } = request.query;
-      const products = await knex<ProductRepository>("products")
-        .select()
-        .whereLike("name", `%${name ?? ""}%`)
-        .orderBy("name");
-
-      return response.json(products);
-    } catch (error) {
-      next(error);
-    }
-  }
-
   async create(request: Request, response: Response, next: NextFunction) {
     try {
       const bodySchema = z.object({
@@ -30,6 +16,20 @@ class ProductsController {
       await knex<ProductRepository>("products").insert({ name, price });
 
       return response.status(201).json();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async index(request: Request, response: Response, next: NextFunction) {
+    try {
+      const { name } = request.query;
+      const products = await knex<ProductRepository>("products")
+        .select()
+        .whereLike("name", `%${name ?? ""}%`)
+        .orderBy("name");
+
+      return response.json(products);
     } catch (error) {
       next(error);
     }
