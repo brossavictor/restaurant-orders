@@ -7,7 +7,7 @@ export async function up(knex: Knex): Promise<void> {
         .integer("table_session_id")
         .notNullable()
         .references("id")
-        .inTable("table_sessions"),
+        .inTable("tables_sessions"),
       table
         .integer("product_id")
         .notNullable()
