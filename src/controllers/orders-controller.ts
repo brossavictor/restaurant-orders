@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { z } from "zod";
+import { object, z } from "zod";
 import { knex } from "@/database/knex";
 import { AppError } from "@/utils/AppError";
 
@@ -52,7 +52,7 @@ class OrdersController {
   async index(request: Request, response: Response, next: NextFunction) {
     try {
       const { table_session_id } = request.params;
-      const order = await knex("orders")
+      const orders = await knex("orders")
         .select(
           "orders.id",
           "orders.table_session_id",
@@ -68,7 +68,27 @@ class OrdersController {
         .where({ table_session_id })
         .orderBy("orders.created_at", "desc");
 
-      return response.json(order);
+      const simplifiedOrders = orders.reduceRight(
+        (acc: any[], current: Order) => {
+          const { product_id, name, price, quantity, total } = current;
+
+          const index = acc.findIndex(
+            (item) => item.product_id === current.product_id
+          );
+
+          if (index == -1) {
+            acc.push({ product_id, name, price, quantity, total });
+          } else {
+            acc[index].total += total;
+            acc[index].quantity += quantity;
+          }
+
+          return acc;
+        },
+        []
+      );
+
+      return response.json(simplifiedOrders);
     } catch (error) {
       next(error);
     }

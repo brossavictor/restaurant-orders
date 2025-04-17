@@ -7,3 +7,8 @@ type OrderRepository = {
   created_at: number;
   updated_at: number;
 };
+
+type Order = OrderRepository & {
+  name: string;
+  total: number;
+};
